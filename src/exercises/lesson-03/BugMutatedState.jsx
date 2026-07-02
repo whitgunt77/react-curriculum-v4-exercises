@@ -10,11 +10,10 @@
 
 import { useState } from 'react';
 export default function BugMutatedState() {
-  let [count, setCount] = useState(0);
+  const [count, setCount] = useState(0);
 
   function handleAdd() {
-    count++;
-    setCount(count);
+    setCount(count + 1);
   }
 
   return (
@@ -27,3 +26,9 @@ export default function BugMutatedState() {
 
 // Explanation:
 // (Write your explanation here)
+/*
+In React, state must be treated as immutable. You cannot update state by directly modifying the
+variable (e.g., count++), because React will not detect the change or trigger a UI re-render.
+You must always use the setter function (setCount) to update state, ensuring React correctly
+tracks the data and updates the view.
+*/
