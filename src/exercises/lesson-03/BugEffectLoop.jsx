@@ -14,11 +14,18 @@ export default function BugEffectLoop() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    setCount(count + 1);
-  });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCount((prevCount) => prevCount + 1);
+  }, []);
 
   return <p>Bug 1 Count: {count}</p>;
 }
 
 // Explanation:
 // (Write your explanation here)
+/*
+The code created an infinite loop because useEffect runs after every render by default.
+By calling setCount inside the effect without a dependency array, the component re-rendered,
+triggering the effect again, and so on. Adding the empty dependency array [] ensures the
+effect runs only once on mount.
+*/
