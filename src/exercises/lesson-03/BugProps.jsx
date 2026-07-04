@@ -11,12 +11,13 @@
 
   Use the commented "Explanation" section at the bottom of this lesson's components.
 */
+import { useState } from 'react';
 
 export default function BugProps({ name = 'friend' }) {
-  let message = 'Hello, ' + name;
+  const [message, setMessage] = useState('Hello, ' + name);
 
   function handleChange() {
-    message = 'Hi, ' + name + '!';
+    setMessage('Hi, ' + name + '!');
   }
 
   return (
@@ -29,3 +30,11 @@ export default function BugProps({ name = 'friend' }) {
 
 // Explanation:
 // (Write your explanation here)
+/*
+The issue occurred because message was a standard variable.
+React only updates the UI when it detects changes to State.
+Since local variables are not "reactive," modifying them
+doesn't trigger a re-render. By using the useState hook,
+you provide React with a way to track the value and notify
+the component to update the UI whenever that value changes.
+*/
