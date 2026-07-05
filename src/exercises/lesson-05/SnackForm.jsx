@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import styles from './SnackForm.module.css';
 
 export default function SnackForm({
@@ -9,17 +10,50 @@ export default function SnackForm({
 }) {
   const isEditing = Boolean(editingSnack);
 
+  // State initialization
+  const [name, setName] = useState('');
+  const [rating, setRating] = useState('');
+  const [touched, setTouched] = useState({ name: false, rating: false });
+
+  // Sync state when editingSnack changes
+  useEffect(() => {
+    if (isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setName(editingSnack.name);
+      setRating(editingSnack.rating);
+      setTouched({ name: false, rating: false });
+    } else {
+      setName('');
+      setRating('');
+      setTouched({ name: false, rating: false });
+    }
+  }, [editingSnack, isEditing]);
+
+  // Validation logic
+  const isNameValid = name.trim().length > 0;
+  const isRatingValid = rating !== '' && rating >= 1 && rating <= 5;
+
+  const getNameError = () =>
+    touched.name && !isNameValid ? 'Snack name is required' : null;
+  const getRatingError = () =>
+    touched.rating && !isRatingValid ? 'Please select a rating (1-5)' : null;
+
   function handleSubmit(e) {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const name = formData.get('name');
-    const rating = formData.get('rating');
 
-    if (isEditing) {
-      updateSnack(editingSnack.id, name, rating);
+    // Validate all fields on submit
+    if (isNameValid && isRatingValid) {
+      if (isEditing) {
+        updateSnack(editingSnack.id, name, rating);
+      } else {
+        addSnack(name, rating);
+        setName('');
+        setRating('');
+      }
+      setTouched({ name: false, rating: false });
     } else {
-      addSnack(name, rating);
-      e.target.reset();
+      // Mark all as touched if user tries to submit an invalid form
+      setTouched({ name: true, rating: true });
     }
   }
 
@@ -27,6 +61,7 @@ export default function SnackForm({
     <form
       onSubmit={handleSubmit}
       className={`${styles.form} ${className || ''}`}
+      noValidate
     >
       <h3 className={styles['form-title']}>
         {isEditing ? '✏️ Edit Snack' : '➕ Add Snack'}
@@ -36,26 +71,30 @@ export default function SnackForm({
         <label className={styles['field-label']}>Name:</label>
         <input
           type="text"
-          name="name"
-          defaultValue={isEditing ? editingSnack.name : ''}
-          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onFocus={() => setTouched((prev) => ({ ...prev, name: true }))}
           className={styles['field-input']}
           placeholder="Enter snack name"
         />
+        {getNameError() && <div className={styles.error}>{getNameError()}</div>}
       </div>
 
       <div className={styles['field-container']}>
         <label className={styles['field-label']}>Rating:</label>
         <input
           type="number"
-          name="rating"
-          defaultValue={isEditing ? editingSnack.rating : ''}
-          required
+          value={rating}
+          onChange={(e) => setRating(e.target.value)}
+          onFocus={() => setTouched((prev) => ({ ...prev, rating: true }))}
           min="1"
           max="5"
           className={styles['field-input']}
           placeholder="Rate 1-5"
         />
+        {getRatingError() && (
+          <div className={styles.error}>{getRatingError()}</div>
+        )}
       </div>
 
       <div className={styles['button-container']}>
