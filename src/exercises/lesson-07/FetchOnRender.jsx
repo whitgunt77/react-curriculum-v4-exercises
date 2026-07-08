@@ -1,11 +1,37 @@
+import { useState, useEffect } from 'react';
+import { getPosts } from './api';
 import './Lesson07Styles.css';
 
 export default function FetchOnRender() {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    getPosts()
+      .then((data) => {
+        setPosts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div className="root">Loading posts...</div>;
+  if (error) return <div className="root">Error: {error}</div>;
+
   return (
     <div className="root">
       <h1 className="heading">Fetch list of posts on render</h1>
       <div className="content">
-        TODO: Replace me with fetched data when the component renders
+        {posts.map((post) => (
+          <div key={post.id} style={{ marginBottom: '1rem' }}>
+            <h2>{post.title}</h2>
+            <p>{post.body}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
